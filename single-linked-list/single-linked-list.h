@@ -33,31 +33,32 @@ class SingleLinkedList {
 			node_ = other.node_;
 		}
 		BasicIterator& operator=(const BasicIterator &rhs) = default;
-		[[nodiscard]] bool operator==(const BasicIterator<const Type> &rhs) const noexcept {
+
+		template<typename T>
+		[[nodiscard]] bool operator==(const BasicIterator<T> &rhs) const noexcept {
 			return this->node_ == rhs.node_;
 		}
-		[[nodiscard]] bool operator!=(const BasicIterator<const Type> &rhs) const noexcept {
-			return this->node_ != rhs.node_;
+		template<typename T>
+		[[nodiscard]] bool operator!=(const BasicIterator<T> &rhs) const noexcept {
+			return !(this->node_ == rhs.node_);
 		}
-		[[nodiscard]] bool operator==(const BasicIterator<Type> &rhs) const noexcept {
-			return this->node_ == rhs.node_;
-		}
-		[[nodiscard]] bool operator!=(const BasicIterator<Type> &rhs) const noexcept {
-			return this->node_ != rhs.node_;
-		}
+
 		BasicIterator& operator++() noexcept {
+			assert(this->node_);
 			node_ = node_->next_node;
 			return *this;
 		}
 		BasicIterator operator++(int) noexcept {
 			BasicIterator old(*this);
-			node_ = node_->next_node;
+			++*this;
 			return old;
 		}
 		[[nodiscard]] reference operator*() const noexcept {
+			assert(this->node_);
 			return node_->value;
 		}
 		[[nodiscard]] pointer operator->() const noexcept {
+			assert(this->node_);
 			return &node_->value;
 		}
 
@@ -91,14 +92,12 @@ public:
 		head_.next_node = nullptr;
 	}
 	void PushFront(const Type &value) {
-		head_.next_node = new Node(value, head_.next_node);
-		++size_;
+		InsertAfter(before_begin(), value);
 	}
 	void PopFront() {
-		Node *temp_next = head_.next_node;
-		head_.next_node = head_.next_node->next_node;
-		--size_;
-		delete temp_next;
+		if (size_) {
+		EraseAfter(before_begin());
+		}
 	}
 	Iterator InsertAfter(ConstIterator pos, const Type &value) {
 		pos.node_->next_node = new Node(value, pos.node_->next_node);
@@ -114,11 +113,8 @@ public:
 	}
 	void Clear() noexcept {
 		while (head_.next_node) {
-			Node *new_next = head_.next_node->next_node;
-			delete head_.next_node;
-			head_.next_node = new_next;
+			PopFront();
 		}
-		size_ = 0;
 	}
 	~SingleLinkedList() {
 		Clear();
@@ -127,10 +123,7 @@ public:
 		return size_;
 	}
 	bool IsEmpty() const noexcept {
-		if (size_ == 0) {
-			return true;
-		}
-		return false;
+		return size_ == 0;
 	}
 	void swap(SingleLinkedList &other) noexcept {
 		size_t temp_size = size_;
