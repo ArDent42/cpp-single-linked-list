@@ -164,13 +164,10 @@ public:
 private:
 	template<typename T>
 	void CreateList(const T &container) {
-		SingleLinkedList<Type> list_reversed;
 		SingleLinkedList<Type> list;
+		auto last_element_iter = list.cbefore_begin();
 		for (const auto &element : container) {
-			list_reversed.PushFront(element);
-		}
-		for (const auto &element : list_reversed) {
-			list.PushFront(element);
+			last_element_iter = list.InsertAfter(last_element_iter, element);
 		}
 		swap(list);
 	}
