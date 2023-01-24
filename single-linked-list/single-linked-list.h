@@ -1,5 +1,6 @@
 #pragma once
 #include <algorithm>
+#include <utility>
 template<typename Type>
 class SingleLinkedList {
 	struct Node {
@@ -105,9 +106,7 @@ public:
 		return Iterator { pos.node_->next_node };
 	}
 	Iterator EraseAfter(ConstIterator pos) noexcept {
-		Node *temp_next = pos.node_->next_node;
-		pos.node_->next_node = pos.node_->next_node->next_node;
-		delete temp_next;
+		delete std::exchange(pos.node_->next_node, pos.node_->next_node->next_node);
 		--size_;
 		return Iterator { pos.node_->next_node };
 	}
@@ -126,12 +125,8 @@ public:
 		return size_ == 0;
 	}
 	void swap(SingleLinkedList &other) noexcept {
-		size_t temp_size = size_;
-		Node *temp_ptr = head_.next_node;
-		size_ = other.size_;
-		head_.next_node = other.head_.next_node;
-		other.size_ = temp_size;
-		other.head_.next_node = temp_ptr;
+		std::swap(size_, other.size_);
+		std::swap(head_.next_node, other.head_.next_node);
 	}
 	[[nodiscard]] Iterator begin() noexcept {
 		return Iterator { head_.next_node };
